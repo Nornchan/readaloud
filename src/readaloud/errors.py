@@ -1,8 +1,12 @@
 """Error types.
 
 Every failure mode the user can hit gets its own class, its own exit code, and
-its own hint saying what to do about it. The spec is explicit that a paywalled
-page, a scanned PDF, and a missing API key must not look like the same error.
+its own hint saying what to do about it. A gated page, a scanned PDF and a
+missing model file must not look like the same error.
+
+Exit code 9 is retired: it belonged to the missing-API-key path, which went
+away when the hosted engine did. Codes are not renumbered — scripts may key
+off them.
 """
 
 from __future__ import annotations
@@ -64,12 +68,6 @@ class ConfigError(ReadaloudError):
     """The config file is missing, unreadable, or malformed."""
 
     exit_code = 8
-
-
-class MissingAPIKeyError(ConfigError):
-    """The selected engine needs a credential that isn't set anywhere."""
-
-    exit_code = 9
 
 
 class SynthesisError(ReadaloudError):

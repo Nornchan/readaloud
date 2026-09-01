@@ -1,9 +1,9 @@
 """The speech IR — what the normalizer emits and the backends render.
 
 Three node types, per SPEC.md Appendix A.3. Deliberately engine-neutral: the
-normalizer never writes SSML, because Azure takes SSML, Eleven v3 dropped it
-for `[pause]` tags, macOS `say` uses `[[slnc]]`, and Piper has nothing at all.
-Each backend renders these nodes in its own dialect.
+normalizer never writes SSML, because macOS `say` uses `[[slnc]]`, Kokoro has
+no markup at all, and any future engine will want its own dialect. A backend
+that cannot speak a pause gets it as real silence at stitch time.
 """
 
 from __future__ import annotations

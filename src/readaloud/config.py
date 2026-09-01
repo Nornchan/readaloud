@@ -4,9 +4,7 @@ Precedence, highest first:
 
     command-line flag  >  environment variable  >  config file  >  built-in default
 
-API keys are deliberately *not* in that list: they are read from the
-environment first and the config file second, and there is no flag for them,
-because a flag leaks the key into shell history.
+Every backend is local, so there are no credentials anywhere in this module.
 
 The file lives at `~/.config/readaloud/config.toml` (or `$XDG_CONFIG_HOME`).
 """
@@ -30,7 +28,7 @@ FORMATS = ("mp3", "m4a", "wav")
 SPEED_MIN = 0.5
 SPEED_MAX = 2.0
 
-DEFAULT_ENGINE = "azure"
+DEFAULT_ENGINE = "kokoro"
 DEFAULT_ACCENT = "uk"
 DEFAULT_GENDER = "female"
 DEFAULT_FORMAT = "mp3"
@@ -43,12 +41,10 @@ CONFIG_TEMPLATE = """\
 # readaloud configuration
 #
 # Anything here can be overridden by a command-line flag.
-# API keys may also be supplied by environment variable, which takes
-# precedence over this file — see `readaloud --help`.
+# Every engine runs locally; there are no credentials to set.
 
 [defaults]
-# engine = "azure"        # hosted (needs an API key) — best quality
-# engine = "piper"        # offline, no key, no network
+# engine = "kokoro"       # local neural TTS — the default, no network
 # engine = "say"          # macOS `say`, development only
 accent = "uk"             # us, uk, au, ie, in, za, nz, ca
 gender = "female"         # female, male
@@ -56,9 +52,8 @@ format = "mp3"            # mp3, m4a, wav
 speed = 1.0               # 0.5 – 2.0
 # header = true           # speak "<title>, by <author>" before the body
 
-[engines.azure]
-# api_key = "..."         # or set AZURE_SPEECH_KEY in your shell
-# region = "uksouth"
+[engines.kokoro]
+# model = "fp16"          # fp16, q8f16, quantized, full — smaller is faster
 """
 
 
@@ -98,16 +93,6 @@ class Settings:
 
     def options_for(self, engine: str) -> dict[str, Any]:
         return dict(self.engine_options.get(engine, {}))
-
-    def api_key(self, engine: str, env_var: str) -> str | None:
-        """Environment first, then the engine's config table."""
-        from_env = os.environ.get(env_var)
-        if from_env and from_env.strip():
-            return from_env.strip()
-        from_file = self.options_for(engine).get("api_key")
-        if isinstance(from_file, str) and from_file.strip():
-            return from_file.strip()
-        return None
 
 
 def _validate_choice(name: str, value: Any, allowed: tuple[str, ...], origin: str) -> str:
@@ -192,7 +177,7 @@ def load(path: Path | None = None) -> Settings:
     if not isinstance(engines, dict):
         raise ConfigError(
             f"[engines] in {path} must be a table",
-            "Each engine gets its own table, e.g. [engines.elevenlabs].",
+            "Each engine gets its own table, e.g. [engines.kokoro].",
         )
     engine_options = {
         name: dict(table) for name, table in engines.items() if isinstance(table, dict)

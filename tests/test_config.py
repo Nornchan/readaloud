@@ -93,24 +93,14 @@ def test_defaults_must_be_a_table():
         config.load()
 
 
-def test_api_key_from_environment(monkeypatch):
-    write_config('[engines.elevenlabs]\napi_key = "from-file"\n')
-    monkeypatch.setenv("ELEVENLABS_API_KEY", "from-env")
-    assert config.load().api_key("elevenlabs", "ELEVENLABS_API_KEY") == "from-env"
-
-
-def test_api_key_falls_back_to_config_file():
-    write_config('[engines.elevenlabs]\napi_key = "from-file"\n')
-    assert config.load().api_key("elevenlabs", "ELEVENLABS_API_KEY") == "from-file"
-
-
-def test_api_key_absent_is_none():
-    assert config.load().api_key("elevenlabs", "ELEVENLABS_API_KEY") is None
-
-
 def test_engine_options_are_exposed():
-    write_config('[engines.piper]\nmodel = "en_GB-alba-medium"\n')
-    assert config.load().options_for("piper") == {"model": "en_GB-alba-medium"}
+    write_config('[engines.kokoro]\nmodel = "q8f16"\n')
+    assert config.load().options_for("kokoro") == {"model": "q8f16"}
+
+
+def test_there_is_no_credential_lookup_left():
+    """Every backend is local; a key chain would be dead code and a footgun."""
+    assert not hasattr(config.Settings(), "api_key")
 
 
 def test_ensure_file_creates_a_private_template():

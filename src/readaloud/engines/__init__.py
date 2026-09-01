@@ -55,37 +55,22 @@ class EngineSpec:
     module: str
     factory: str
     summary: str
-    env_var: str | None = None
-    offline: bool = False
     development: bool = False
     """Not a shipping engine — exists to make rule changes audible."""
 
-    @property
-    def needs_key(self) -> bool:
-        return self.env_var is not None
-
 
 _REGISTRY: dict[str, EngineSpec] = {
-    "azure": EngineSpec(
-        name="azure",
-        module="readaloud.engines.azure",
-        factory="AzureBackend",
-        summary="hosted neural TTS — all eight accents, full SSML, needs an API key",
-        env_var="AZURE_SPEECH_KEY",
-    ),
-    "piper": EngineSpec(
-        name="piper",
-        module="readaloud.engines.piper",
-        factory="PiperBackend",
-        summary="offline neural TTS — lower quality, no key, no network",
-        offline=True,
+    "kokoro": EngineSpec(
+        name="kokoro",
+        module="readaloud.engines.kokoro",
+        factory="KokoroBackend",
+        summary="local neural TTS (Kokoro-82M via onnxruntime) — no network, no key",
     ),
     "say": EngineSpec(
         name="say",
         module="readaloud.engines.say",
         factory="SayBackend",
         summary="macOS `say` — development only, for checking how rules sound",
-        offline=True,
         development=True,
     ),
 }

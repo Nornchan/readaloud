@@ -13,7 +13,6 @@ def isolated_home(tmp_path, monkeypatch):
     monkeypatch.setenv("NO_COLOR", "1")
     for name in [key for key in os.environ if key.startswith("READALOUD_")]:
         monkeypatch.delenv(name, raising=False)
-    monkeypatch.delenv("ELEVENLABS_API_KEY", raising=False)
     return tmp_path
 
 

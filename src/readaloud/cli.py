@@ -49,7 +49,6 @@ examples:
   readaloud --list-voices
 
 environment:
-  ELEVENLABS_API_KEY   credential for the hosted engine
   READALOUD_ENGINE     default engine, overriding the config file
   READALOUD_ACCENT     default accent   (also _GENDER, _VOICE, _SPEED, _FORMAT)
   NO_COLOR             disable coloured output
@@ -135,7 +134,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--estimate",
         action="store_true",
-        help="print word count, character count, cost and runtime; synthesize nothing",
+        help="print word count, character count and runtime; synthesize nothing",
     )
     parser.add_argument(
         "--keep-text",
@@ -264,7 +263,6 @@ def print_estimate(
     if document.page_count:
         rows.append(("pages", f"{document.page_count:,}"))
     rows.append(("runtime", f"~{minutes:.0f} min at {settings.speed}x"))
-    rows.append(("cost", f"unavailable — the {settings.engine} backend is not wired up yet"))
 
     width = max(len(label) for label, _ in rows)
     for label, value in rows:

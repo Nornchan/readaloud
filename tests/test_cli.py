@@ -70,7 +70,7 @@ def test_verbose_shows_the_pipeline_stages(article, capsys, tmp_path, monkeypatc
     err = capsys.readouterr().err
     assert f"[source] html {article}" in err
     assert "[voice] in/male" in err
-    assert "[engine] azure" in err
+    assert "[engine] kokoro" in err
     assert "[extract]" in err
     assert "blocks" in err
 
@@ -131,7 +131,7 @@ def test_scanned_pdf_has_its_own_exit_code(tmp_path, capsys):
 def test_unbuilt_backend_is_reported(article, capsys, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert main([str(article)]) == 2
-    assert "azure backend is not available yet" in capsys.readouterr().err
+    assert "kokoro backend is not available yet" in capsys.readouterr().err
 
 
 def test_config_subcommand_prints_path_without_a_tty(capsys):
