@@ -1,0 +1,47 @@
+# <figcaption> HTML figure caption element
+# 99 spoken words, 45 nodes
+SAY   <figcaption>
+SPELL HTML
+SAY   figure caption element.
+PAUSE 1200
+SAY   Code omitted.
+PAUSE 900
+SAY   Baseline Widely available.
+PAUSE 400
+SAY   This feature is well established and works across many devices and browser versions. It's been available across browsers since July 2015.
+PAUSE 500
+SAY   The <figcaption>
+SPELL HTML
+SAY   element represents a caption or legend describing the rest of the contents of its parent <figure> element, providing the <figure> an accessible name.
+PAUSE 500
+SAY   Code omitted.
+PAUSE 900
+SAY   Try it.
+PAUSE 400
+SAY   Code omitted.
+PAUSE 900
+SAY   Attributes.
+PAUSE 400
+SAY   This element only includes the global attributes.
+PAUSE 900
+SAY   Examples.
+PAUSE 400
+SAY   Please see the <figure> page for examples on <figcaption>.
+PAUSE 500
+SAY   Code omitted.
+PAUSE 900
+SAY   Technical summary.
+PAUSE 400
+SAY   Table omitted.
+PAUSE 900
+SAY   Specifications.
+PAUSE 400
+SAY   Table omitted.
+PAUSE 900
+SAY   Browser compatibility.
+PAUSE 900
+SAY   See also.
+PAUSE 400
+SAY   The <figure> element.
+PAUSE 500
+SAY   Code omitted.

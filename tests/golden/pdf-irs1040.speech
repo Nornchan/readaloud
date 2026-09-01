@@ -1,0 +1,185 @@
+# 2025 Form 1040
+# 1,526 spoken words, 183 nodes
+SAY   2025 Form 1040.
+PAUSE 1200
+SAY   By C:DC:TS:CAR:
+SPELL MP
+SAY   .
+PAUSE 1200
+SAY   1040 2025 U.S. Individual Income Tax Return.
+PAUSE 400
+SAY   Department of the Treasury—Internal Revenue Service
+PAUSE 500
+SAY   OMB No. 1545-0074
+SPELL IRS
+SAY   Use Only—Do not write or staple in this space.
+PAUSE 500
+SAY   For the year Jan. 1–Dec. 31, 2025, or other tax year beginning, 2025, ending, 20 See separate instructions.
+PAUSE 500
+SAY   Filed pursuant to section 301.9100-2 Combat zone Deceased MM DD YYYY / / Spouse MM DD YYYY / /
+PAUSE 500
+SAY   Your first name and middle initial Last name Your social security number
+PAUSE 500
+SAY   If joint return, spouse's first name and middle initial Last name Spouse's social security number
+PAUSE 500
+SAY   Check here if your main home, and your spouse's if filing a joint return, was in the U.S. for more than half of 2025.
+PAUSE 500
+SAY   Home address (number and street). If you have a P.O. box, see instructions. Apt. no.
+PAUSE 500
+SAY   Presidential Election Campaign Check here if you, or your spouse if filing jointly, want $3 to go to this fund. Checking a box below will not change your tax or refund.
+PAUSE 500
+SAY   City, town, or post office. If you have a foreign address, also complete spaces below. State ZIP code
+PAUSE 500
+SAY   Foreign country name Foreign province/state/county Foreign postal code
+PAUSE 900
+SAY   You Spouse Filing Status.
+PAUSE 400
+SAY   Single Married filing jointly (even if only one had income)
+PAUSE 500
+SAY   Check only one box.
+PAUSE 500
+SAY   Head of household (HOH) Qualifying surviving spouse (QSS) If you checked the HOH or QSS box, enter the child's name if the qualifying person is a child but not your dependent:
+PAUSE 500
+SAY   Married filing separately (MFS). Enter spouse's SSN above and full name here:
+PAUSE 500
+SAY   If treating a nonresident alien or dual-status alien spouse as a U.S. resident for the entire tax year, check the box and enter their name (see instructions and attach statement if required): Digital Assets At any time during 2025, did you: (a) receive (as a reward, award, or payment for property or services); or (b) sell, exchange, or otherwise dispose of a digital asset (or a financial interest in a digital asset)? (See instructions.).. Yes No Dependents
+PAUSE 500
+SAY   Dependent 1 Dependent 2 Dependent 3 Dependent 4
+PAUSE 500
+SAY   (1) First name
+PAUSE 500
+SAY   (2) Last name
+PAUSE 500
+SAY   If more than four dependents, see instructions and check here..
+PAUSE 500
+SAY   (3) SSN
+PAUSE 500
+SAY   (4) Relationship
+PAUSE 500
+SAY   (5) Check if lived with you more than half of 2025
+PAUSE 500
+SAY   (a) Yes
+PAUSE 500
+SAY   (a) Yes
+PAUSE 500
+SAY   (b) And in the U.S.
+PAUSE 500
+SAY   (a) Yes
+PAUSE 500
+SAY   (a) Yes
+PAUSE 500
+SAY   (b) And in the U.S.
+PAUSE 500
+SAY   (6) Check if Full-time student
+PAUSE 500
+SAY   (b) And in the U.S.
+PAUSE 500
+SAY   (b) And in the U.S.
+PAUSE 500
+SAY   Permanently and totally disabled (7) Credits Child tax credit
+PAUSE 500
+SAY   Credit for other dependents Check if your filing status is MFS or HOH and you lived apart from your spouse for the last 6 months of 2025, or you are legally separated according to your state law under a written separation agreement or a decree of separate maintenance and you did not live in the same household as your spouse at the end of 2025. Income
+PAUSE 500
+SAY   1 a Total amount from Form(s) W-2, box 1 (see instructions)............. 1a b Household employee wages not reported on Form(s) W-2............. 1b
+PAUSE 500
+SAY   Attach Form(s) W-2 here. Also attach Forms W-2G and 1099-R if tax was withheld. If you did not get a Form W-2, see instructions.
+PAUSE 500
+SAY   c Tip income not reported on line 1a (see instructions).............. 1c d Medicaid waiver payments not reported on Form(s) W-2 (see instructions)........ 1d e Taxable dependent care benefits from Form 2441, line 26............ 1e
+PAUSE 500
+SAY   f Employer-provided adoption benefits from Form 8839, line 31........... 1f g Wages from Form 8919, line 6..................... 1g h Other earned income (see instructions). Enter type and amount: 1h
+PAUSE 500
+SAY   i Nontaxable combat pay election (see instructions)....... 1i z Add lines 1a through 1h...................... 1z
+PAUSE 500
+SAY   2a Tax-exempt interest... 2a b Taxable interest..... 2b
+PAUSE 500
+SAY   Attach Sch. B if required.
+PAUSE 500
+SAY   3a Qualified dividends... 3a b Ordinary dividends..... 3b c Check if your child's dividends are included in 1 Line 3a 2 Line 3b 4a IRA distributions.... 4a b Taxable amount...... 4b
+PAUSE 500
+SAY   c Check if (see instructions)..... 1 Rollover 2 QCD 3 5a Pensions and annuities.. 5a b Taxable amount...... 5b c Check if (see instructions)..... 1 Rollover 2 PSO 3
+PAUSE 500
+SAY   6a Social security benefits.. 6a b Taxable amount...... 6b c If you elect to use the lump-sum election method, check here (see instructions)..... d If you are married filing separately and lived apart from your spouse the entire year (see inst.), check here
+PAUSE 500
+SAY   7a Capital gain or (loss). Attach Schedule D if required.............. 7a b Check if: Schedule D not required Includes child's capital gain or (loss) 8 Additional income from Schedule 1, line 10................. 8
+PAUSE 500
+SAY   9 Add lines 1z, 2b, 3b, 4b, 5b, 6b, 7a, and 8. This is your total income......... 9 10 Adjustments to income from Schedule 1, line 26............... 10 11a Subtract line 10 from line 9. This is your adjusted gross income.......... 11a
+PAUSE 500
+SAY   For Disclosure, Privacy Act, and Paperwork Reduction Act Notice, see separate instructions. Cat. Number 11320B Form 1040 (2025) Created 9/5/25
+PAUSE 500
+SAY   Form 1040 (2025) Page 2 Tax and Credits
+PAUSE 500
+SAY   11b Amount from line 11a (adjusted gross income)................ 11b 12a Someone can claim You as a dependent Your spouse as a dependent
+PAUSE 500
+SAY   b Spouse itemizes on a separate return c You were a dual-status alien d You: Were born before January 2, 1961 Are blind Spouse: Was born before January 2, 1961 Is blind Standard deduction for— • Single or Married filing separately, $15,750 • Married filing jointly or Qualifying surviving spouse, $31,500 • Head of household, $23,625 • If you checked a box on line 12a, 12b, 12c, or 12d, see inst.
+PAUSE 500
+SAY   e Standard deduction or itemized deductions (from Schedule A)........... 12e 13a Qualified business income deduction from Form 8995 or Form 8995-A......... 13a b Additional deductions from Schedule 1-A, line 38............... 13b
+PAUSE 500
+SAY   14 Add lines 12e, 13a, and 13b..................... 14 15 Subtract line 14 from line 11b. If zero or less, enter -0-. This is your taxable income..... 15 16 Tax (see instructions). Check if any from Form(s): 1 8814 2 4972 3 16
+PAUSE 500
+SAY   17 Amount from Schedule 2, line 3.................... 17 18 Add lines 16 and 17........................ 18 19 Child tax credit or credit for other dependents from Schedule 8812.......... 19
+PAUSE 500
+SAY   20 Amount from Schedule 3, line 8.................... 20 21 Add lines 19 and 20........................ 21 22 Subtract line 21 from line 18. If zero or less, enter -0-.............. 22
+PAUSE 500
+SAY   23 Other taxes, including self-employment tax, from Schedule 2, line 21......... 23 24 Add lines 22 and 23. This is your total tax................. 24 Payments and Refundable Credits
+PAUSE 500
+SAY   25 Federal income tax withheld from:
+PAUSE 500
+SAY   a Form(s) W-2.................. 25a b Form(s) 1099.................. 25b c Other forms (see instructions)............. 25c
+PAUSE 500
+SAY   d Add lines 25a through 25c...................... 25d 26 2025 estimated tax payments and amount applied from 2024 return.......... 26
+PAUSE 500
+SAY   If you made estimated tax payments with your former spouse in 2025, enter their SSN (see instructions): If you have a qualifying child, you may need to attach Sch. EIC.
+PAUSE 500
+SAY   27a Earned income credit (EIC).............. 27a b Clergy filing Schedule SE (see instructions)................
+PAUSE 500
+SAY   c If you do not want to claim the EIC, check here...............
+PAUSE 500
+SAY   28 Additional child tax credit (ACTC) from Schedule 8812. If you do not want to claim the ACTC, check here............ 28
+PAUSE 500
+SAY   29 American opportunity credit from Form 8863, line 8....... 29 30 Refundable adoption credit from Form 8839, line 13...... 30 31 Amount from Schedule 3, line 15............ 31
+PAUSE 500
+SAY   32 Add lines 27a, 28, 29, 30, and 31. These are your total other payments and refundable credits. 32 33 Add lines 25d, 26, and 32. These are your total payments............ 33 Refund 34 If line 33 is more than line 24, subtract line 24 from line 33. This is the amount you overpaid.. 34
+PAUSE 500
+SAY   35a Amount of line 34 you want refunded to you. If Form 8888 is attached, check here.... 35a
+PAUSE 500
+SAY   b Routing number c Type: Checking Savings
+PAUSE 500
+SAY   Direct deposit? See instructions.
+PAUSE 500
+SAY   d Account number
+PAUSE 500
+SAY   36 Amount of line 34 you want applied to your 2026 estimated tax... 36 Amount You Owe
+PAUSE 500
+SAY   37 Subtract line 33 from line 24. This is the amount you owe. For details on how to pay, go to link or see instructions........ 37 38 Estimated tax penalty (see instructions).......... 38 Third Party Designee
+PAUSE 500
+SAY   Do you want to allow another person to discuss this return with the
+SPELL IRS
+SAY   ? See instructions. Yes. Complete below. No
+PAUSE 500
+SAY   Personal identification number (PIN) Sign Here
+PAUSE 500
+SAY   Designee's name
+PAUSE 500
+SAY   Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief, they are true, correct, and complete. Declaration of preparer (other than taxpayer) is based on all information of which preparer has any knowledge.
+PAUSE 500
+SAY   Your signature Date Your occupation If the
+SPELL IRS
+SAY   sent you an Identity Protection PIN, enter it here (see inst.)
+PAUSE 500
+SAY   Joint return? See instructions. Keep a copy for your records.
+PAUSE 500
+SAY   Spouse's signature. If a joint return, both must sign. Date Spouse's occupation If the
+SPELL IRS
+SAY   sent your spouse an Identity Protection PIN, enter it here (see inst.)
+PAUSE 500
+SAY   Phone no. Email address Paid Preparer Use Only
+PAUSE 500
+SAY   Preparer's name Preparer's signature Date PTIN Check if:
+PAUSE 500
+SAY   Self-employed
+PAUSE 500
+SAY   Firm's name Phone no.
+PAUSE 500
+SAY   Firm's address Firm's EIN
+PAUSE 500
+SAY   Go to link for instructions and the latest information. Form 1040 (2025)
