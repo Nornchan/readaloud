@@ -91,8 +91,12 @@ def spec(name: str) -> EngineSpec:
     return found
 
 
-def load(name: str) -> TTSBackend:
-    """Import and instantiate a backend by name."""
+def load(name: str, options: dict | None = None) -> TTSBackend:
+    """Import and instantiate a backend by name.
+
+    `options` is the engine's own table from the config file, e.g.
+    [engines.kokoro] model = "q8f16".
+    """
     found = spec(name)
     try:
         module = __import__(found.module, fromlist=[found.factory])
@@ -102,4 +106,8 @@ def load(name: str) -> TTSBackend:
             "Synthesis backends arrive in a later milestone; "
             "`readaloud --estimate` and `--keep-text` work without one.",
         ) from exc
-    return getattr(module, found.factory)()
+    factory = getattr(module, found.factory)
+    try:
+        return factory(options or {})
+    except TypeError:
+        return factory()  # backends that take no configuration

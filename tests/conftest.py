@@ -32,6 +32,68 @@ def no_network(monkeypatch, request):
     import httpx
 
     monkeypatch.setattr(httpx.Client, "get", refuse)
+    # kokoro's model downloader streams; without this a test that reaches
+    # synthesis quietly pulls 156MB.
+    monkeypatch.setattr(httpx, "stream", refuse)
+
+
+class FakeBackend:
+    """A backend that costs nothing.
+
+    Most CLI tests are about the pipeline, not the engine. Loading Kokoro in
+    each would mean a model download and real inference, so `main()` gets this
+    unless a test asks for the real thing with @pytest.mark.real_engine.
+    """
+
+    name = "fake"
+    max_chars = 2_000
+    supports_ssml = False
+    pause_style = "silence"
+
+    def __init__(self, options=None):
+        self.calls = []
+
+    def list_voices(self):
+        from readaloud.engines import Voice
+
+        return [
+            Voice("fake_uk_f", "fake_uk_f", "uk", "female"),
+            Voice("fake_us_m", "fake_us_m", "us", "male"),
+        ]
+
+    def resolve_voice(self, accent, gender):
+        from readaloud.errors import AccentUnavailableError
+
+        if accent not in ("uk", "us"):
+            raise AccentUnavailableError(
+                f"fake has no {accent} voice", "Try --accent uk."
+            )
+        return f"fake_{accent}_{gender[0]}"
+
+    def synthesize(self, text, voice, speed):
+        import io
+        import wave
+
+        self.calls.append((text, voice, speed))
+        buffer = io.BytesIO()
+        with wave.open(buffer, "wb") as handle:
+            handle.setnchannels(1)
+            handle.setsampwidth(2)
+            handle.setframerate(24_000)
+            handle.writeframes(b"\x00\x00" * 2_400)  # 0.1s of silence
+        return buffer.getvalue()
+
+
+@pytest.fixture(autouse=True)
+def fake_backend(monkeypatch, request):
+    """Swap the real engine out of the CLI unless a test opts in."""
+    if "real_engine" in request.keywords:
+        return None
+    backend = FakeBackend()
+    import readaloud.engines
+
+    monkeypatch.setattr(readaloud.engines, "load", lambda name, options=None: backend)
+    return backend
 
 
 ARTICLE_HTML = """<!DOCTYPE html>

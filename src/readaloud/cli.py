@@ -237,7 +237,7 @@ def open_config(reporter: Reporter) -> int:
 
 def list_voices(settings: Settings, reporter: Reporter) -> int:
     reporter.stage("engine", settings.engine)
-    backend = engines.load(settings.engine)  # raises until milestone 6
+    backend = engines.load(settings.engine, settings.options_for(settings.engine))
     grouped: dict[str, list] = {}
     for voice in backend.list_voices():
         grouped.setdefault(voice.accent or "other", []).append(voice)
@@ -245,7 +245,9 @@ def list_voices(settings: Settings, reporter: Reporter) -> int:
         print(accent)
         for voice in sorted(grouped[accent], key=lambda entry: entry.name):
             gender = voice.gender or "-"
-            print(f"  {voice.id:<28} {voice.name:<24} {gender}")
+            # The description carries the engine's own quality grade, which is
+            # the only thing that distinguishes 28 otherwise-identical rows.
+            print(f"  {voice.id:<20} {gender:<8} {voice.description}")
     return 0
 
 
@@ -346,7 +348,7 @@ def run(args: argparse.Namespace, settings: Settings, reporter: Reporter) -> int
         reporter.stage("preview", f"first {PREVIEW_WORDS} words")
 
     try:
-        backend = engines.load(settings.engine)
+        backend = engines.load(settings.engine, settings.options_for(settings.engine))
     except ReadaloudError:
         if args.keep_text:
             print(output.text_path(audio))

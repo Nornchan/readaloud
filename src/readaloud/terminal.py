@@ -67,6 +67,22 @@ class Reporter:
         """Progress the user always wants, verbose or not."""
         print(style(message, "dim", self.stream), file=self.stream)
 
+    def progress(self, done: int, total: int, label: str = "") -> None:
+        """A single rewriting line. Silent when piped — the spec forbids a
+        progress bar on non-TTY output, but silence during a multi-minute
+        synthesis is also unacceptable, so a non-TTY gets nothing here and
+        the stage lines carry the load instead."""
+        if not self.stream.isatty() or total <= 0:
+            return
+        width = 24
+        filled = int(width * done / total)
+        bar = "#" * filled + "." * (width - filled)
+        print(f"\r  {label} [{bar}] {done}/{total}", end="", file=self.stream)
+
+    def progress_done(self) -> None:
+        if self.stream.isatty():
+            print(file=self.stream)
+
     def warn(self, message: str) -> None:
         print(f"{style('warning:', 'yellow', self.stream)} {message}", file=self.stream)
 

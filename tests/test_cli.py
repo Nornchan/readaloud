@@ -1,3 +1,5 @@
+import re
+
 import pytest
 from conftest import ARTICLE_HTML, make_pdf
 
@@ -77,10 +79,11 @@ def test_verbose_shows_the_pipeline_stages(article, capsys, tmp_path, monkeypatc
 
 def test_quiet_by_default(article, capsys, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    main([str(article)])
-    err = capsys.readouterr().err
-    assert "[source]" not in err
-    assert "error:" in err
+    assert main([str(article)]) == 0
+    captured = capsys.readouterr()
+    assert "[source]" not in captured.err
+    # On success stdout carries the path and the duration, and nothing else.
+    assert re.fullmatch(r".*\.mp3\s+\d+:\d{2}", captured.out.strip())
 
 
 def test_estimate_prints_counts_and_exits_zero(article, capsys):
@@ -99,10 +102,9 @@ def test_estimate_respects_speed(article, capsys):
 def test_keep_text_writes_a_file(article, capsys, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     assert main([str(article), "--keep-text"]) == 0
-    printed = capsys.readouterr().out.strip()
     written = tmp_path / "the-tunnel-under-the-thames.txt"
-    assert printed == str(written)
     assert "tunnelling shield" in written.read_text()
+    assert ".mp3" in capsys.readouterr().out
 
 
 def test_keep_text_honours_out(article, capsys, tmp_path):
@@ -128,10 +130,36 @@ def test_scanned_pdf_has_its_own_exit_code(tmp_path, capsys):
     assert "no text layer" in capsys.readouterr().err
 
 
-def test_unbuilt_backend_is_reported(article, capsys, tmp_path, monkeypatch):
+def test_audio_is_produced(article, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
-    assert main([str(article)]) == 2
-    assert "kokoro backend is not available yet" in capsys.readouterr().err
+    assert main([str(article)]) == 0
+    audio = tmp_path / "the-tunnel-under-the-thames.mp3"
+    assert audio.exists() and audio.stat().st_size > 0
+
+
+def test_each_paragraph_reaches_the_engine_separately(article, tmp_path,
+                                                      monkeypatch, fake_backend):
+    """The silence pause style splits at pauses so the gaps are real audio."""
+    monkeypatch.chdir(tmp_path)
+    main([str(article)])
+    assert len(fake_backend.calls) > 3
+    assert not any("[[slnc" in text for text, _, _ in fake_backend.calls)
+
+
+def test_format_is_honoured(article, tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    main([str(article), "-f", "wav"])
+    assert (tmp_path / "the-tunnel-under-the-thames.wav").exists()
+
+
+def test_an_unavailable_accent_is_a_hard_error(article, capsys, tmp_path, monkeypatch):
+    """A silent substitution costs a whole run to discover."""
+    monkeypatch.chdir(tmp_path)
+    assert main([str(article), "--accent", "au"]) == 12
+    err = capsys.readouterr().err
+    assert "no au voice" in err
+    assert "--accent uk" in err
+    assert not list(tmp_path.glob("*.mp3"))
 
 
 def test_config_subcommand_prints_path_without_a_tty(capsys):
@@ -146,9 +174,11 @@ def test_config_subcommand_takes_no_arguments(capsys):
     assert "takes no arguments" in capsys.readouterr().err
 
 
-def test_list_voices_explains_the_missing_backend(capsys):
-    assert main(["--list-voices"]) == 2
-    assert "not available yet" in capsys.readouterr().err
+def test_list_voices_groups_by_accent(capsys):
+    assert main(["--list-voices"]) == 0
+    out = capsys.readouterr().out
+    assert "uk" in out and "us" in out
+    assert out.index("uk") < out.index("us")   # sorted
 
 
 # --- milestone 3: word count, warnings, new flags, preview ----------------

@@ -53,7 +53,8 @@ speed = 1.0               # 0.5 – 2.0
 # header = true           # speak "<title>, by <author>" before the body
 
 [engines.kokoro]
-# model = "fp16"          # fp16, q8f16, quantized, full — smaller is faster
+# model = "full"          # full is the default; fp16 and q8f16 are
+                          # smaller but emit silent NaN audio
 """
 
 

@@ -450,3 +450,37 @@ def test_stamps_only_apply_to_pdfs():
 def test_emails_are_removed():
     assert expand("write to jane@example.com now") == "write to now"
     assert expand("{a,b}@google.com") == ""
+
+
+def test_lettered_footnotes_are_stripped():
+    """Wikipedia's [a] markers were surviving into the audio."""
+    assert strip_citation_markers("Brunel [a] was an engineer") == "Brunel was an engineer"
+    assert strip_citation_markers("see [note 3] below") == "see below"
+
+
+def test_bracketed_prose_survives():
+    text = "the claim [citation needed] was disputed"
+    assert strip_citation_markers(text) == text
+
+
+@pytest.mark.parametrize("author", [
+    "Authority control databases",
+    "Wikipedia contributors",
+    "The editors of Something",
+    "Newsroom",
+    "a byline so long it is obviously not a person's name at all really",
+])
+def test_junk_authors_are_not_spoken(author):
+    from readaloud.normalize import plausible_author
+    assert not plausible_author(author)
+
+
+@pytest.mark.parametrize("author", ["Jane Marlow", "J. K. Rowling", "Ada Lovelace"])
+def test_real_authors_are_spoken(author):
+    from readaloud.normalize import plausible_author
+    assert plausible_author(author)
+
+
+def test_header_skips_a_junk_author():
+    document = Document(title="Brunel", author="Authority control databases")
+    assert said(header_nodes(document)) == "Brunel."

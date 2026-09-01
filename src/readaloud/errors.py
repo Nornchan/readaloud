@@ -76,6 +76,22 @@ class SynthesisError(ReadaloudError):
     exit_code = 10
 
 
+class AccentUnavailableError(ReadaloudError):
+    """The engine has no voice for the requested accent.
+
+    Its own code because it is recoverable in a way the others are not: the
+    message names an accent the user can actually pass instead.
+    """
+
+    exit_code = 12
+
+
+class ModelError(ReadaloudError):
+    """A local model file is missing, undownloadable, or corrupt."""
+
+    exit_code = 13
+
+
 class DependencyError(ReadaloudError):
     """An external program we shell out to (ffmpeg) is missing."""
 

@@ -7,14 +7,16 @@ rendering the speech IR for a backend, and encoding what comes back — stay.
 
 from __future__ import annotations
 
+import io
 import shutil
 import subprocess
+import wave
 from pathlib import Path
 
 from readaloud.config import Settings
 from readaloud.engines import TTSBackend
 from readaloud.errors import DependencyError, SynthesisError
-from readaloud.speech import Speech, render
+from readaloud.speech import Pause, Say, Speech, Spell, render
 from readaloud.terminal import Reporter
 
 _CODECS = {
@@ -121,6 +123,91 @@ def warn_on_fallback(
         )
 
 
+def _segments(speech: Speech) -> list[tuple[str, object]]:
+    """Split the IR into spoken runs and the pauses between them."""
+    out: list[tuple[str, object]] = []
+    current: Speech = []
+    for node in speech:
+        if isinstance(node, Pause):
+            if current:
+                out.append(("say", current))
+                current = []
+            out.append(("pause", node.ms))
+        else:
+            current.append(node)
+    if current:
+        out.append(("say", current))
+    return out
+
+
+def _concat_wav(pieces: list[bytes], pauses: dict[int, int]) -> bytes:
+    """Join WAV segments, inserting real silence where the pauses were.
+
+    This is what the `silence` pause style means: an engine that cannot speak
+    a pause gets one anyway, because we control the audio. Milestone 5 moves
+    the joining to ffmpeg alongside chunk stitching and loudness; the shape of
+    it does not change.
+    """
+    frames: list[bytes] = []
+    params = None
+    for index, piece in enumerate(pieces):
+        with wave.open(io.BytesIO(piece), "rb") as handle:
+            if params is None:
+                params = handle.getparams()
+            frames.append(handle.readframes(handle.getnframes()))
+        gap = pauses.get(index)
+        if gap:
+            silence = b"\x00" * int(
+                params.framerate * params.sampwidth * params.nchannels * gap / 1000
+            )
+            frames.append(silence)
+
+    if params is None:
+        raise SynthesisError("nothing to synthesize")
+
+    buffer = io.BytesIO()
+    with wave.open(buffer, "wb") as handle:
+        handle.setnchannels(params.nchannels)
+        handle.setsampwidth(params.sampwidth)
+        handle.setframerate(params.framerate)
+        handle.writeframes(b"".join(frames))
+    return buffer.getvalue()
+
+
+def _synthesize_with_silence(
+    speech: Speech,
+    backend: TTSBackend,
+    voice: str,
+    settings: Settings,
+    reporter: Reporter,
+) -> bytes:
+    parts = _segments(speech)
+    spoken = [item for kind, item in parts if kind == "say"]
+    pieces: list[bytes] = []
+    pauses: dict[int, int] = {}
+
+    index = -1
+    for kind, item in parts:
+        if kind == "pause":
+            if index >= 0:
+                pauses[index] = pauses.get(index, 0) + int(item)
+            continue
+        text = render(item, backend.pause_style)
+        if not text:
+            continue
+        index += 1
+        reporter.progress(index + 1, len(spoken), "synthesizing")
+        pieces.append(backend.synthesize(text, voice, settings.speed))
+
+    reporter.progress_done()
+    if not pieces:
+        raise SynthesisError(
+            "there was nothing to say once the rules had run",
+            "Try --keep-text to see what survived normalization.",
+        )
+    return _concat_wav(pieces, pauses)
+
+
 def synthesize_once(
     speech: Speech,
     backend: TTSBackend,
@@ -131,12 +218,16 @@ def synthesize_once(
     """Render, synthesize and encode in one pass. Returns (path, seconds)."""
     voice = resolve_voice(backend, settings)
     warn_on_fallback(backend, voice, settings, reporter)
-    text = render(speech, backend.pause_style)
-
     reporter.stage("voice", f"{voice} ({backend.name})")
-    reporter.stage("synthesize", f"{len(text):,} characters in one request")
 
-    raw = backend.synthesize(text, voice, settings.speed)
+    if backend.pause_style == "silence":
+        # The engine cannot speak a pause, so we make one.
+        raw = _synthesize_with_silence(speech, backend, voice, settings, reporter)
+    else:
+        text = render(speech, backend.pause_style)
+        reporter.stage("synthesize", f"{len(text):,} characters in one request")
+        raw = backend.synthesize(text, voice, settings.speed)
+
     if not raw:
         raise SynthesisError(
             f"the {backend.name} backend returned no audio",

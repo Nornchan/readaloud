@@ -91,7 +91,16 @@ _EMOJI = re.compile(
 
 _SUPERSCRIPT_MARKERS = re.compile(r"[¹²³⁰-⁹]+")
 
-_BRACKET_CITATION = re.compile(r"\s*\[\s*\d+(?:\s*[,–-]\s*\d+)*\s*\]")
+# Numeric citations, and the lettered footnotes Wikipedia uses ([a], [b]),
+# and named notes ([note 1]). Anything longer is left alone — [citation
+# needed] is content, and so is most other bracketed prose.
+_BRACKET_CITATION = re.compile(
+    r"\s*\[\s*(?:\d+(?:\s*[,–-]\s*\d+)*"
+    r"|[a-z]"
+    r"|note\s*\d+"
+    r"|nb\s*\d+)\s*\]",
+    re.IGNORECASE,
+)
 
 _AUTHOR_YEAR = re.compile(
     r"\s*\((?:see\s+)?(?:e\.g\.,?\s*)?"
@@ -480,13 +489,35 @@ def _similar(left: str, right: str) -> float:
     return SequenceMatcher(None, _tokens(left), _tokens(right)).ratio()
 
 
+# Extractor metadata guesses an author from whatever looks like a byline, and
+# on some pages that is furniture. "By Authority control databases." is what
+# Wikipedia yields, and it is the first thing you hear.
+_JUNK_AUTHOR = re.compile(
+    r"authority control|wikipedia|contributors|editorial|editors of|"
+    r"staff writer|admin|newsroom|^by\b|\bstaff$|guest (?:author|writer)",
+    re.IGNORECASE,
+)
+
+AUTHOR_MAX_WORDS = 6
+
+
+def plausible_author(author: str | None) -> bool:
+    """Is this a person's name, or is it page furniture?"""
+    if not author:
+        return False
+    cleaned = " ".join(author.split())
+    if not cleaned or len(cleaned.split()) > AUTHOR_MAX_WORDS:
+        return False
+    return not _JUNK_AUTHOR.search(cleaned)
+
+
 def header_nodes(document: Document) -> Speech:
     """"*Title*, by *Author*" — what makes a folder of MP3s navigable by ear."""
     nodes: Speech = []
     if document.title:
         nodes += utterances(ensure_terminal(document.title))
         nodes.append(Pause(Pauses.SECTION))
-    if document.author:
+    if plausible_author(document.author):
         nodes += utterances(ensure_terminal(f"By {document.author}"))
         nodes.append(Pause(Pauses.SECTION))
     return nodes
