@@ -64,18 +64,38 @@ DEFAULT_VARIANT = "full"
 
 UNSTABLE_VARIANTS = frozenset({"fp16", "q8f16"})
 
-# Measured over the corpus at speed 1.0: 16.2 chars/s (bf_emma), 15.0
-# (af_heart), 16.9 (bm_fable). Used only to notice truncation, never to shape
-# output.
-CHARS_PER_SECOND = 15.7
+# Calibrated against 28 real chunks sampled across all 16 corpus documents
+# (scripts/calibrate_truncation.py), speed 1.0, voice bf_emma: mean 15.57
+# chars/s. Used only to notice truncation, never to shape output.
+CHARS_PER_SECOND = 15.57
 
-# How far below the estimate counts as truncation. The voice-to-voice spread
-# above is only ±7%, so legitimate audio never lands near 0.35 — and a false
-# alarm on good audio would be worse than missing a marginal case.
-TRUNCATION_RATIO = 0.35
+# How far below the expected duration counts as truncation, i.e. the guard
+# fires when observed_rate > CHARS_PER_SECOND / TRUNCATION_RATIO.
+#
+# Calibrated from the same 28-chunk sample: for every chunk, ratio_i =
+# CHARS_PER_SECOND / observed_rate_i is how close that *real, non-truncated*
+# audio came to tripping the guard. The tightest of the 28 was 0.780 (a
+# 420-character Guardian paragraph at 19.97 chars/s) — HTML prose, not PDF;
+# PDF's raw mean looked slower only because of table remnants read digit by
+# digit (real, legitimate, very slow speech — see the note on chars/s
+# stability below), which sit at ratio 1.8-3.7 and are nowhere near this
+# constraint. 0.55 leaves 29% margin below that single tightest sample.
+#
+# n=28 is not large; if the guard starts rejecting real short/punchy prose in
+# practice, that's the number to revisit, not the corpus's slow content.
+TRUNCATION_RATIO = 0.55
 
 # Below this the rate estimate is noise, so the length check is skipped.
 MIN_GUARDED_CHARS = 60
+
+# Chars/s stability, from the same calibration: HTML mean 16.87 (n=20, max
+# 19.97), PDF mean 12.32 (n=8, max 18.80) but 16.15 (n=5, max 18.80) once the
+# three table-remnant chunks are excluded — PDF tables are not detected by
+# extraction (see document.py) and arrive as ordinary paragraphs, so a block
+# that is actually a table of numbers gets read one digit at a time. That is
+# real, correct, slow speech, not an engine problem, and it only pulls the
+# *slow* tail; it never threatens the fast-tail constraint TRUNCATION_RATIO
+# is set against.
 
 
 @dataclass(frozen=True)

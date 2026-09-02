@@ -248,3 +248,22 @@ def test_the_unstable_variant_hint_names_the_fix():
     with pytest.raises(Exception) as caught:
         backend._check_output(np.array([], dtype="float32"), _text(700), "bf_emma", 1.0)
     assert 'model = "full"' in caught.value.hint
+
+
+def test_the_raised_threshold_catches_moderate_truncation():
+    """Regression proof: this case sits strictly between the old ratio
+    (0.35) and the calibrated one (0.55). It must be REJECTED now --
+    otherwise "raise the threshold" changed a comment but not the
+    behaviour. (It is not run against the old code; the bound is computed
+    from the old constant to show where the case would have landed.)"""
+    from readaloud.engines.kokoro import CHARS_PER_SECOND
+
+    backend = KokoroBackend()
+    text = _text(700)
+    old_bound = len(text) / (CHARS_PER_SECOND * 1.0) * 0.35
+    new_bound = len(text) / (CHARS_PER_SECOND * 1.0) * 0.55
+    audio_seconds = (old_bound + new_bound) / 2  # strictly between the two
+    assert old_bound < audio_seconds < new_bound
+
+    with pytest.raises(Exception, match="truncated"):
+        backend._check_output(_samples(audio_seconds), text, "bf_emma", 1.0)
