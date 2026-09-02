@@ -64,6 +64,19 @@ DEFAULT_VARIANT = "full"
 
 UNSTABLE_VARIANTS = frozenset({"fp16", "q8f16"})
 
+# Measured over the corpus at speed 1.0: 16.2 chars/s (bf_emma), 15.0
+# (af_heart), 16.9 (bm_fable). Used only to notice truncation, never to shape
+# output.
+CHARS_PER_SECOND = 15.7
+
+# How far below the estimate counts as truncation. The voice-to-voice spread
+# above is only ±7%, so legitimate audio never lands near 0.35 — and a false
+# alarm on good audio would be worse than missing a marginal case.
+TRUNCATION_RATIO = 0.35
+
+# Below this the rate estimate is noise, so the length check is skipped.
+MIN_GUARDED_CHARS = 60
+
 
 @dataclass(frozen=True)
 class _KokoroVoice:
@@ -290,18 +303,46 @@ class KokoroBackend:
         if rate != SAMPLE_RATE:  # pragma: no cover - kokoro is fixed at 24kHz
             raise SynthesisError(f"unexpected sample rate {rate} from kokoro")
 
-        # Guard the silent failure: a NaN pass comes back as an empty array,
-        # because kokoro trims the silence it thinks it produced. Without this
-        # the run "succeeds" and writes an audio file with nothing in it.
+        self._check_output(samples, text, voice, speed)
+        return _to_wav(samples)
+
+    def _check_output(
+        self, samples: np.ndarray, text: str, voice: str, speed: float
+    ) -> None:
+        """Reject audio that cannot be what the text asked for.
+
+        A NaN pass comes back as an *empty* array, because kokoro trims the
+        silence it thinks it produced — so without a check the run "succeeds"
+        and writes a file with nothing in it.
+
+        Truncation is the same failure wearing a disguise: a chunk that stops
+        a third of the way through is not obviously wrong in the log, and on a
+        long article nobody notices until they are listening to it. Duration
+        is predictable enough from character count to catch that cheaply.
+        """
+        detail = (
+            f" The {self.variant} model is numerically unstable; run "
+            f'`readaloud config` and set model = "full".'
+            if self.variant in UNSTABLE_VARIANTS
+            else " Try a different --speed."
+        )
+
         if len(samples) == 0 or not np.isfinite(samples).all():
-            detail = (
-                f" The {self.variant} model is numerically unstable; "
-                f"`readaloud config` and set model = \"full\"."
-                if self.variant in UNSTABLE_VARIANTS
-                else " Try a different --speed."
-            )
             raise SynthesisError(
                 f"kokoro produced no usable audio for {voice!r} at speed {speed}",
                 f"This is a model defect, not a problem with your text.{detail}",
             )
-        return _to_wav(samples)
+
+        # Short fragments vary too much for a rate estimate to mean anything.
+        if len(text) < MIN_GUARDED_CHARS:
+            return
+
+        seconds = len(samples) / SAMPLE_RATE
+        expected = len(text) / (CHARS_PER_SECOND * speed)
+        if seconds < expected * TRUNCATION_RATIO:
+            raise SynthesisError(
+                f"kokoro returned {seconds:.1f}s of audio for {len(text)} "
+                f"characters, when {expected:.1f}s was expected — the chunk "
+                f"was truncated",
+                f"This is a model defect, not a problem with your text.{detail}",
+            )

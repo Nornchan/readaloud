@@ -177,3 +177,74 @@ def test_speed_changes_the_length(real_cache):
     slow = backend.synthesize(text, "bf_emma", 0.8)
     fast = backend.synthesize(text, "bf_emma", 1.5)
     assert len(slow) > len(fast) * 1.2
+
+
+# --- the truncation half of the output guard -------------------------------
+
+
+def _samples(seconds: float):
+    import numpy as np
+
+    from readaloud.engines.kokoro import SAMPLE_RATE
+
+    return np.full(int(SAMPLE_RATE * seconds), 0.1, dtype="float32")
+
+
+def _text(chars: int) -> str:
+    return ("the tunnel flooded five times during construction. " * 40)[:chars]
+
+
+def test_truncated_output_is_rejected():
+    """Half a chunk is not obviously wrong in a log, and nobody notices until
+    they are listening to it."""
+    backend = KokoroBackend()
+    text = _text(700)                       # ~45s expected
+    with pytest.raises(Exception) as caught:
+        backend._check_output(_samples(5.0), text, "bf_emma", 1.0)
+    assert "truncated" in str(caught.value)
+
+
+def test_plausible_output_passes():
+    backend = KokoroBackend()
+    text = _text(700)
+    backend._check_output(_samples(44.0), text, "bf_emma", 1.0)
+
+
+def test_the_guard_scales_with_speed():
+    """At 2x the same text is half as long, and that is not truncation."""
+    backend = KokoroBackend()
+    text = _text(700)
+    backend._check_output(_samples(22.0), text, "bf_emma", 2.0)
+
+
+def test_short_fragments_are_not_length_checked():
+    """Rate estimates are noise below a sentence; only emptiness is checked."""
+    backend = KokoroBackend()
+    backend._check_output(_samples(0.2), "Table omitted.", "bf_emma", 1.0)
+
+
+def test_empty_output_is_still_rejected_at_any_length():
+    import numpy as np
+
+    backend = KokoroBackend()
+    with pytest.raises(Exception, match="no usable audio"):
+        backend._check_output(np.array([], dtype="float32"), "Table omitted.", "bf_emma", 1.0)
+
+
+def test_non_finite_output_is_rejected():
+    import numpy as np
+
+    backend = KokoroBackend()
+    bad = _samples(40.0)
+    bad[100] = np.nan
+    with pytest.raises(Exception, match="no usable audio"):
+        backend._check_output(bad, _text(700), "bf_emma", 1.0)
+
+
+def test_the_unstable_variant_hint_names_the_fix():
+    backend = KokoroBackend({"model": "fp16"})
+    import numpy as np
+
+    with pytest.raises(Exception) as caught:
+        backend._check_output(np.array([], dtype="float32"), _text(700), "bf_emma", 1.0)
+    assert 'model = "full"' in caught.value.hint
