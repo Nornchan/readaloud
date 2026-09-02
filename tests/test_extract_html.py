@@ -110,3 +110,61 @@ def test_plain_text_rendering_is_readable(article):
     assert "# How it was built" in text
     assert "- The shield weighed" in text
     assert text.endswith("\n")
+
+
+# --- title site-suffix stripping -------------------------------------------
+
+from readaloud.extract.html import _strip_site_suffix
+
+
+def test_strips_a_pipe_separated_domain_suffix():
+    assert _strip_site_suffix(
+        "PEP 8 – Style Guide for Python Code | peps.python.org",
+        "https://peps.python.org/pep-0008/",
+    ) == "PEP 8 – Style Guide for Python Code"
+
+
+def test_strips_a_hyphen_separated_site_name():
+    assert _strip_site_suffix(
+        "Isambard Kingdom Brunel - Wikipedia", "https://en.wikipedia.org/wiki/Brunel"
+    ) == "Isambard Kingdom Brunel"
+
+
+def test_a_real_en_dash_in_the_title_is_not_mistaken_for_a_suffix():
+    """The trap case: real title content containing the separator character,
+    with no site suffix at all."""
+    title = (
+        "The extraordinary untold story of Freddie Mercury: Mary Austin on "
+        "her best friend – and love of her life"
+    )
+    assert _strip_site_suffix(title, "https://www.theguardian.com/music/x") == title
+
+
+def test_a_short_trailing_segment_that_merely_resembles_the_domain_survives():
+    """newyork is a substring of newyorker -- a fuzzy match would eat real
+    title content here. Exact match only."""
+    title = "Best Restaurants - New York"
+    assert _strip_site_suffix(title, "https://www.newyorker.com/food/best") == title
+
+
+def test_no_url_means_no_strip():
+    assert _strip_site_suffix("Some Title - Site", None) == "Some Title - Site"
+
+
+def test_no_separator_is_untouched():
+    assert _strip_site_suffix("A Title With No Suffix", "https://example.com/a") == \
+        "A Title With No Suffix"
+
+
+def test_verbose_site_name_that_does_not_match_the_domain_is_left_alone():
+    """Under-stripping (a slightly clunky header) is the accepted cost of
+    never over-stripping real content."""
+    title = "Q3 Earnings Beat Estimates - The Widget Gazette"
+    assert _strip_site_suffix(title, "https://widgetgazette.example.com/x") == title
+
+
+def test_end_to_end_through_extract_html():
+    document = extract_html(ARTICLE_HTML, url="https://example.com/tunnel")
+    # ARTICLE_HTML's own title has no suffix; this just confirms the pipeline
+    # calls the strip without breaking an ordinary title.
+    assert document.title == "The Tunnel Under the Thames"

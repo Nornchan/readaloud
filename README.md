@@ -11,8 +11,13 @@ readaloud notes.html -o notes.m4a -f m4a
 
 ## Status
 
-Built in milestones (see `SPEC.md`). Milestone 1 — CLI, config, source-type
-detection — is done. Extraction, normalization, and synthesis follow.
+Built in milestones (see `SPEC.md`, including Appendices A and B — the
+pipeline contract and the change to local-only engines). Done: skeleton
+(1), extraction (2), normalization (3), first synthesis (4), and chunking +
+caching + stitching + tagging (5). `readaloud <source>` produces real,
+tagged, loudness-normalized audio end to end via the local Kokoro-82M
+engine. Remaining: a second local engine and `voices.yaml` (6), the
+Homebrew formula (7).
 
 ## Install (development)
 

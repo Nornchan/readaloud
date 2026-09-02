@@ -23,7 +23,7 @@ from readaloud.extract import extract
 from readaloud.extract.html import paywall_markers
 from readaloud.normalize import NormalizeOptions, normalize
 from readaloud.source import Source, SourceKind, detect
-from readaloud.synthesize import format_duration, play, synthesize_once
+from readaloud.synthesize import format_duration, play, synthesize_document
 from readaloud.terminal import Reporter
 
 # Roughly how fast a neural TTS voice speaks at 1.0x. Used only for the
@@ -359,7 +359,10 @@ def run(args: argparse.Namespace, settings: Settings, reporter: Reporter) -> int
             return 0
         raise
 
-    path, seconds = synthesize_once(speech, backend, settings, audio, reporter)
+    path, seconds = synthesize_document(
+        speech, backend, settings, audio, reporter,
+        document=document, use_cache=not args.no_cache,
+    )
 
     if args.preview:
         play(path)

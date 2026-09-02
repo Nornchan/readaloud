@@ -1,12 +1,10 @@
-# Thames Tunnel - Wikipedia
-# 4,731 spoken words, 215 nodes
-SAY   Thames Tunnel - Wikipedia.
-PAUSE 1200
-SAY   By Authority control databases International VIAF GND WorldCat Geographic Structurae Other Yale LUX.
+# Thames Tunnel
+# 4,715 spoken words, 213 nodes
+SAY   Thames Tunnel.
 PAUSE 1200
 SAY   Banquet in the Thames Tunnel by George Jones, 1827
 PAUSE 500
-SAY   The Thames Tunnel is a tunnel beneath the River Thames in London, connecting Rotherhithe and Wapping. It measures 35 ft (11 m) wide by 20 ft (6.1 m) high and is 1,300 ft (400 m) long, running at a depth of 75 ft (23 m) below the river surface measured at high tide. It is the first tunnel known to have been constructed successfully underneath a navigable river. [a] It was built between 1825 and 1843 by Marc Brunel, and his son, Isambard, using the tunnelling shield newly invented by the elder Brunel and Thomas Cochrane.
+SAY   The Thames Tunnel is a tunnel beneath the River Thames in London, connecting Rotherhithe and Wapping. It measures 35 ft (11 m) wide by 20 ft (6.1 m) high and is 1,300 ft (400 m) long, running at a depth of 75 ft (23 m) below the river surface measured at high tide. It is the first tunnel known to have been constructed successfully underneath a navigable river. It was built between 1825 and 1843 by Marc Brunel, and his son, Isambard, using the tunnelling shield newly invented by the elder Brunel and Thomas Cochrane.
 PAUSE 500
 SAY   The tunnel was originally designed for horse-drawn carriages, but was mainly used by pedestrians and became a tourist attraction. In 1869 it was converted into a railway tunnel for use by the East London line which, since 2010, is part of the London Overground railway network under the ownership of Transport for London.
 PAUSE 900

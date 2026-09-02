@@ -8,6 +8,7 @@ into one string. The plain-text output format throws that away.
 from __future__ import annotations
 
 import re
+from urllib.parse import urlparse
 
 import trafilatura
 from lxml import etree, html as lxml_html
@@ -44,6 +45,15 @@ _NOT_FREE = re.compile(
 )
 
 _HEADING_LEVEL = re.compile(r"h(\d)")
+
+# Separators sites commonly use before a trailing site name in <title>:
+# "Article – Site", "Article | Site", "Article :: Site", "Article » Site".
+# Deliberately excludes a bare hyphen-with-spaces from this list on its own
+# risk profile -- see _strip_site_suffix, which only ever acts on the
+# RIGHTMOST match and only when the trailing segment matches the page's own
+# domain, so a real title that happens to contain one of these characters
+# (the Guardian sample below) is left alone rather than mangled.
+_TITLE_SEPARATOR = re.compile(r"\s[—–|»]\s|\s-\s|\s::\s")
 
 
 def paywall_markers(raw_html: str) -> list[str]:
@@ -229,10 +239,59 @@ def extract_html(raw_html: str, url: str | None = None) -> Document:
         )
 
     meta = root.attrib if root is not None else {}
+    resolved_url = url or (meta.get("url") or None)
+    title = meta.get("title") or None
+    if title:
+        title = _strip_site_suffix(title, resolved_url)
     return Document(
         blocks=blocks,
-        title=meta.get("title") or None,
+        title=title,
         author=meta.get("author") or None,
         date=meta.get("date") or None,
-        url=url or (meta.get("url") or None),
+        url=resolved_url,
     )
+
+
+def _strip_site_suffix(title: str, url: str | None) -> str:
+    """"Article Title — Site Name" becomes "Article Title", so the spoken
+    header says the article, not "Isambard Kingdom Brunel - Wikipedia."
+
+    Conservative on purpose. A separator alone is not enough evidence: real
+    titles contain dashes and colons as ordinary punctuation (a Guardian
+    headline in the wild reads "...on her best friend – and love of her
+    life", with no site suffix at all — stripping on separator shape would
+    mangle it). The rightmost separator match is only accepted when its
+    trailing segment plausibly names the site the page actually came
+    from, checked against that URL's own domain — ground truth we already
+    have, rather than a guess from the segment's length or shape.
+    """
+    if not title or not url:
+        return title
+    matches = list(_TITLE_SEPARATOR.finditer(title))
+    if not matches:
+        return title
+    last = matches[-1]
+    head, tail = title[: last.start()].strip(), title[last.end() :].strip()
+    if not head or not tail:
+        return title
+
+    domain = urlparse(url).netloc.lower().removeprefix("www.")
+    if not domain:
+        return title
+    labels = domain.split(".")
+    domain_root = labels[-2] if len(labels) >= 2 else labels[0]
+    domain_clean = re.sub(r"[^a-z0-9]", "", domain)
+    tail_clean = re.sub(r"[^a-z0-9]", "", tail.lower())
+
+    # Exact match only, deliberately. A substring/fuzzy fallback was tried
+    # and rejected: "newyork" is a substring of "newyorker", so a title
+    # like "Best Restaurants - New York" on newyorker.com would have had
+    # its real content ("New York") mistaken for the site name and
+    # deleted. Under-stripping a verbose site name is a mildly clunky
+    # header; over-stripping is a title with real words missing, which is
+    # worse, so this only ever fires on the two shapes actually observed
+    # in the corpus: the bare domain ("peps.python.org") or its root label
+    # ("wikipedia" from en.wikipedia.org).
+    if tail_clean and (tail_clean == domain_clean or tail_clean == domain_root):
+        return head
+    return title

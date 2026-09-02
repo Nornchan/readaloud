@@ -68,16 +68,29 @@ class Reporter:
         print(style(message, "dim", self.stream), file=self.stream)
 
     def progress(self, done: int, total: int, label: str = "") -> None:
-        """A single rewriting line. Silent when piped — the spec forbids a
-        progress bar on non-TTY output, but silence during a multi-minute
-        synthesis is also unacceptable, so a non-TTY gets nothing here and
-        the stage lines carry the load instead."""
-        if not self.stream.isatty() or total <= 0:
+        """A rewriting bar on a TTY; discrete lines when piped.
+
+        The spec forbids a progress *bar* on non-TTY output but also forbids
+        silence during a multi-minute synthesis ("no progress bar when
+        piped" and "silence is unacceptable" are both real requirements,
+        not in tension once "progress bar" is read literally as the
+        carriage-return bar). A redirected run gets a plain line roughly
+        every 5% of the way through instead — never a stream of \r bytes
+        into a log file, never total silence for the length of a long
+        article either.
+        """
+        if total <= 0:
             return
-        width = 24
-        filled = int(width * done / total)
-        bar = "#" * filled + "." * (width - filled)
-        print(f"\r  {label} [{bar}] {done}/{total}", end="", file=self.stream)
+        if self.stream.isatty():
+            width = 24
+            filled = int(width * done / total)
+            bar = "#" * filled + "." * (width - filled)
+            print(f"\r  {label} [{bar}] {done}/{total}", end="", file=self.stream)
+            return
+        step = max(1, total // 20)
+        if done == 1 or done == total or done % step == 0:
+            prefix = f"{label} " if label else ""
+            print(f"  {prefix}{done}/{total}", file=self.stream)
 
     def progress_done(self) -> None:
         if self.stream.isatty():
