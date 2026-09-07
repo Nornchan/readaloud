@@ -38,7 +38,7 @@ dev = ["pytest>=8.0"]
 readaloud = "readaloud.cli:entrypoint"
 
 [project.urls]
-Homepage = "https://github.com/norachan/readaloud"
+Homepage = "https://github.com/Nornchan/readaloud"
 
 [tool.setuptools.packages.find]
 where = ["src"]
