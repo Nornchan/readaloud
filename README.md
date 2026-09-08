@@ -1,5 +1,6 @@
 # readaloud
 
+[![tests](https://github.com/Nornchan/readaloud/actions/workflows/tests.yml/badge.svg)](https://github.com/Nornchan/readaloud/actions/workflows/tests.yml)
 [![homebrew-readaloud CI](https://github.com/Nornchan/homebrew-readaloud/actions/workflows/tests.yml/badge.svg)](https://github.com/Nornchan/homebrew-readaloud/actions/workflows/tests.yml)
 
 Turn a web article, HTML file, or PDF into a listenable audio file, with a

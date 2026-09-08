@@ -1,0 +1,30 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  pytest:
+    # macos-latest currently resolves to arm64, matching the Homebrew
+    # formula's own arch: :arm64 restriction (onnxruntime ships no
+    # Intel-macOS build) -- this is the one platform readaloud actually
+    # targets.
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - run: python -m pip install -e '.[dev]'
+
+      # Tests marked real_engine skip themselves when the Kokoro model
+      # hasn't been downloaded (see tests/test_kokoro_backend.py's
+      # needs_model), which is always true on a fresh runner -- so this
+      # runs the same offline unit suite `pytest` does locally, no marker
+      # exclusion needed. The say backend's tests self-skip the same way
+      # if /usr/bin/say isn't found, though it always is on these runners.
+      - run: pytest -q
