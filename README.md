@@ -13,11 +13,23 @@ readaloud notes.html -o notes.m4a -f m4a
 
 Built in milestones (see `SPEC.md`, including Appendices A and B — the
 pipeline contract and the change to local-only engines). Done: skeleton
-(1), extraction (2), normalization (3), first synthesis (4), and chunking +
-caching + stitching + tagging (5). `readaloud <source>` produces real,
-tagged, loudness-normalized audio end to end via the local Kokoro-82M
-engine. Remaining: a second local engine and `voices.yaml` (6), the
-Homebrew formula (7).
+(1), extraction (2), normalization (3), first synthesis (4), chunking +
+caching + stitching + tagging (5), and the Homebrew formula (7).
+`readaloud <source>` produces real, tagged, loudness-normalized audio end
+to end via the local Kokoro-82M engine. Remaining: a second local engine
+and `voices.yaml` (6).
+
+## Install
+
+```bash
+brew install Nornchan/readaloud/readaloud
+```
+
+Apple Silicon only — the local Kokoro engine runs on onnxruntime, which
+ships no Intel-macOS build. `ffmpeg` and `python@3.12` come along as
+dependencies. On first use, readaloud downloads Kokoro's model (~310MB)
+and caches it in `~/.cache/readaloud/models`; after that it runs fully
+offline.
 
 ## Install (development)
 
