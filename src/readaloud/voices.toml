@@ -1,0 +1,206 @@
+# Voice table for readaloud's engines — data, not code (SPEC.md section 3),
+# so a voice preference, a new voice, or an accent's display name can be
+# changed here without touching Python.
+#
+# Kept as stdlib TOML rather than YAML+PyYAML: see SPEC.md Appendix B.6 for
+# why — one config file this size did not justify a new Homebrew resource.
+#
+# accent_names names every --accent code in English, for error messages,
+# independent of which engines happen to support it.
+[accent_names]
+us = "American"
+uk = "British"
+au = "Australian"
+ie = "Irish"
+in = "Indian"
+za = "South African"
+nz = "New Zealand"
+ca = "Canadian"
+
+# --- kokoro ------------------------------------------------------------
+#
+# Kokoro-82M covers American and British English only (SPEC.md Appendix
+# B.3). `accents` is the hard boundary `resolve()` checks against;
+# `nearest_accent` only makes the resulting error message useful — it is
+# never used to substitute silently. Within a (accent, gender) group,
+# `voices` is listed in preference order (best grade first); the grade is
+# Kokoro's own, from its VOICES.md.
+
+[kokoro]
+accents = ["us", "uk"]
+
+[kokoro.nearest_accent]
+au = "uk"
+nz = "uk"
+ie = "uk"
+za = "uk"
+in = "uk"
+ca = "us"
+
+[[kokoro.voices]]
+id = "af_heart"
+accent = "us"
+gender = "female"
+grade = "A"
+
+[[kokoro.voices]]
+id = "af_bella"
+accent = "us"
+gender = "female"
+grade = "A-"
+
+[[kokoro.voices]]
+id = "af_nicole"
+accent = "us"
+gender = "female"
+grade = "B-"
+
+[[kokoro.voices]]
+id = "af_aoede"
+accent = "us"
+gender = "female"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "af_kore"
+accent = "us"
+gender = "female"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "af_sarah"
+accent = "us"
+gender = "female"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "af_alloy"
+accent = "us"
+gender = "female"
+grade = "C"
+
+[[kokoro.voices]]
+id = "af_nova"
+accent = "us"
+gender = "female"
+grade = "C"
+
+[[kokoro.voices]]
+id = "af_sky"
+accent = "us"
+gender = "female"
+grade = "C-"
+
+[[kokoro.voices]]
+id = "af_jessica"
+accent = "us"
+gender = "female"
+grade = "D"
+
+[[kokoro.voices]]
+id = "af_river"
+accent = "us"
+gender = "female"
+grade = "D"
+
+[[kokoro.voices]]
+id = "am_michael"
+accent = "us"
+gender = "male"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "am_fenrir"
+accent = "us"
+gender = "male"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "am_puck"
+accent = "us"
+gender = "male"
+grade = "C+"
+
+[[kokoro.voices]]
+id = "am_echo"
+accent = "us"
+gender = "male"
+grade = "D"
+
+[[kokoro.voices]]
+id = "am_eric"
+accent = "us"
+gender = "male"
+grade = "D"
+
+[[kokoro.voices]]
+id = "am_liam"
+accent = "us"
+gender = "male"
+grade = "D"
+
+[[kokoro.voices]]
+id = "am_onyx"
+accent = "us"
+gender = "male"
+grade = "D"
+
+[[kokoro.voices]]
+id = "am_santa"
+accent = "us"
+gender = "male"
+grade = "D-"
+
+[[kokoro.voices]]
+id = "am_adam"
+accent = "us"
+gender = "male"
+grade = "F+"
+
+[[kokoro.voices]]
+id = "bf_emma"
+accent = "uk"
+gender = "female"
+grade = "B-"
+
+[[kokoro.voices]]
+id = "bf_isabella"
+accent = "uk"
+gender = "female"
+grade = "C"
+
+[[kokoro.voices]]
+id = "bf_alice"
+accent = "uk"
+gender = "female"
+grade = "D"
+
+[[kokoro.voices]]
+id = "bf_lily"
+accent = "uk"
+gender = "female"
+grade = "D"
+
+[[kokoro.voices]]
+id = "bm_fable"
+accent = "uk"
+gender = "male"
+grade = "C"
+
+[[kokoro.voices]]
+id = "bm_george"
+accent = "uk"
+gender = "male"
+grade = "C"
+
+[[kokoro.voices]]
+id = "bm_lewis"
+accent = "uk"
+gender = "male"
+grade = "D+"
+
+[[kokoro.voices]]
+id = "bm_daniel"
+accent = "uk"
+gender = "male"
+grade = "D"

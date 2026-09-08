@@ -43,6 +43,12 @@ Homepage = "https://github.com/Nornchan/readaloud"
 [tool.setuptools.packages.find]
 where = ["src"]
 
+# voices.toml (milestone 6) is data the package ships, not code — setuptools
+# only bundles .py files from a found package by default, so it needs to be
+# named explicitly or it silently isn't in the wheel.
+[tool.setuptools.package-data]
+readaloud = ["voices.toml"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 markers = [

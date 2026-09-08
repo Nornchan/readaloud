@@ -61,7 +61,7 @@ class SayBackend:
         if not shutil.which("say"):
             raise DependencyError(
                 "the `say` command was not found",
-                "The say backend is macOS-only. Use --engine piper instead.",
+                "The say backend is macOS-only. Use --engine kokoro instead.",
             )
 
     def list_voices(self) -> list[Voice]:

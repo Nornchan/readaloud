@@ -12,12 +12,13 @@ readaloud notes.html -o notes.m4a -f m4a
 ## Status
 
 Built in milestones (see `SPEC.md`, including Appendices A and B — the
-pipeline contract and the change to local-only engines). Done: skeleton
-(1), extraction (2), normalization (3), first synthesis (4), chunking +
-caching + stitching + tagging (5), and the Homebrew formula (7).
-`readaloud <source>` produces real, tagged, loudness-normalized audio end
-to end via the local Kokoro-82M engine. Remaining: a second local engine
-and `voices.yaml` (6).
+pipeline contract and the change to local-only engines). All seven are
+done: skeleton (1), extraction (2), normalization (3), first synthesis
+(4), chunking + caching + stitching + tagging (5), `voices.toml` +
+accent/gender selection (6), and the Homebrew formula (7). `readaloud
+<source>` produces real, tagged, loudness-normalized audio end to end via
+the local Kokoro-82M engine. A second offline engine (Piper) was
+evaluated for milestone 6 and deliberately dropped — see Appendix B.6.
 
 ## Install
 

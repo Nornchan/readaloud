@@ -12,16 +12,17 @@ from pathlib import Path
 
 import pytest
 
+from readaloud import voices as voice_table
 from readaloud.engines.kokoro import (
     DEFAULT_VARIANT,
     MODEL_VARIANTS,
-    NEAREST_ACCENT,
-    SUPPORTED_ACCENTS,
-    VOICE_TABLE,
     KokoroBackend,
     models_dir,
 )
 from readaloud.errors import AccentUnavailableError
+
+VOICE_TABLE = voice_table.voices("kokoro")
+SUPPORTED_ACCENTS = voice_table.supported_accents("kokoro")
 
 
 # Captured before isolated_home redirects HOME: the model lives in the real
@@ -122,7 +123,8 @@ def test_missing_accents_raise_rather_than_substitute(accent):
     with pytest.raises(AccentUnavailableError) as caught:
         KokoroBackend().resolve_voice(accent, "female")
     assert accent not in caught.value.message.split()[-1]  # names the accent, not a voice
-    assert f"--accent {NEAREST_ACCENT[accent]}" in caught.value.hint
+    nearest = voice_table.nearest_accent("kokoro", accent)
+    assert f"--accent {nearest}" in caught.value.hint
     assert "--list-voices" in caught.value.hint
 
 

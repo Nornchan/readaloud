@@ -17,15 +17,15 @@ from __future__ import annotations
 import io
 import sys
 import wave
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import numpy as np
 
+from readaloud import voices as voice_table
 from readaloud.config import cache_home
 from readaloud.engines import Voice
-from readaloud.errors import AccentUnavailableError, ModelError, SynthesisError
+from readaloud.errors import ModelError, SynthesisError
 
 SAMPLE_RATE = 24_000
 
@@ -98,65 +98,12 @@ MIN_GUARDED_CHARS = 60
 # is set against.
 
 
-@dataclass(frozen=True)
-class _KokoroVoice:
-    id: str
-    accent: str
-    gender: str
-    grade: str
-    """Kokoro's own grade from its VOICES.md — worth surfacing, because the
-    range is wide and the British voices are all in the weaker half."""
-
-
-# Destined for voices.yaml in milestone 6; the ordering within each
-# (accent, gender) group is the preference order.
-VOICE_TABLE: tuple[_KokoroVoice, ...] = (
-    # American English — female
-    _KokoroVoice("af_heart", "us", "female", "A"),
-    _KokoroVoice("af_bella", "us", "female", "A-"),
-    _KokoroVoice("af_nicole", "us", "female", "B-"),
-    _KokoroVoice("af_aoede", "us", "female", "C+"),
-    _KokoroVoice("af_kore", "us", "female", "C+"),
-    _KokoroVoice("af_sarah", "us", "female", "C+"),
-    _KokoroVoice("af_alloy", "us", "female", "C"),
-    _KokoroVoice("af_nova", "us", "female", "C"),
-    _KokoroVoice("af_sky", "us", "female", "C-"),
-    _KokoroVoice("af_jessica", "us", "female", "D"),
-    _KokoroVoice("af_river", "us", "female", "D"),
-    # American English — male
-    _KokoroVoice("am_michael", "us", "male", "C+"),
-    _KokoroVoice("am_fenrir", "us", "male", "C+"),
-    _KokoroVoice("am_puck", "us", "male", "C+"),
-    _KokoroVoice("am_echo", "us", "male", "D"),
-    _KokoroVoice("am_eric", "us", "male", "D"),
-    _KokoroVoice("am_liam", "us", "male", "D"),
-    _KokoroVoice("am_onyx", "us", "male", "D"),
-    _KokoroVoice("am_santa", "us", "male", "D-"),
-    _KokoroVoice("am_adam", "us", "male", "F+"),
-    # British English — female
-    _KokoroVoice("bf_emma", "uk", "female", "B-"),
-    _KokoroVoice("bf_isabella", "uk", "female", "C"),
-    _KokoroVoice("bf_alice", "uk", "female", "D"),
-    _KokoroVoice("bf_lily", "uk", "female", "D"),
-    # British English — male
-    _KokoroVoice("bm_fable", "uk", "male", "C"),
-    _KokoroVoice("bm_george", "uk", "male", "C"),
-    _KokoroVoice("bm_lewis", "uk", "male", "D+"),
-    _KokoroVoice("bm_daniel", "uk", "male", "D"),
-)
-
-SUPPORTED_ACCENTS = ("us", "uk")
-
-# Which accent a user asking for an unsupported one is nearest to. Used only
-# to make the error message useful — never to silently substitute.
-NEAREST_ACCENT = {
-    "au": "uk", "nz": "uk", "ie": "uk", "za": "uk", "in": "uk", "ca": "us",
-}
-
-ACCENT_NAMES = {
-    "us": "American", "uk": "British", "au": "Australian", "ie": "Irish",
-    "in": "Indian", "za": "South African", "nz": "New Zealand", "ca": "Canadian",
-}
+# The voice table, supported accents, and nearest-accent fallback used to be
+# Python constants here; they now live in voices.toml (milestone 6), loaded
+# through readaloud.voices — data, not code, so a voice preference or a new
+# voice can be added without touching this file. list_voices() and
+# resolve_voice() below read the table with engine name "kokoro".
+ENGINE_NAME = "kokoro"
 
 
 def models_dir() -> Path:
@@ -269,43 +216,19 @@ class KokoroBackend:
         try:
             available = set(self._load().get_voices())
         except ModelError:
-            available = {entry.id for entry in VOICE_TABLE}
+            available = {entry.id for entry in voice_table.voices(ENGINE_NAME)}
         return [
-            Voice(
-                id=entry.id,
-                name=entry.id,
-                accent=entry.accent,
-                gender=entry.gender,
-                description=f"grade {entry.grade}",
-            )
-            for entry in VOICE_TABLE
-            if entry.id in available
+            voice for voice in voice_table.list_voices(ENGINE_NAME)
+            if voice.id in available
         ]
 
     def resolve_voice(self, accent: str, gender: str) -> str:
         """Best voice for the pair, or a hard error naming the alternative.
 
-        Deliberately not a silent substitution: an accent you did not ask for
-        costs a whole run to discover, and unlike a missing gender there is a
-        real alternative the user can choose between.
+        See readaloud.voices.resolve() for why this is a hard error rather
+        than a silent substitution.
         """
-        if accent not in SUPPORTED_ACCENTS:
-            nearest = NEAREST_ACCENT.get(accent, "uk")
-            raise AccentUnavailableError(
-                f"kokoro has no {ACCENT_NAMES.get(accent, accent)} English voice "
-                f"— it covers American and British English only",
-                f"The nearest it has is --accent {nearest} "
-                f"({ACCENT_NAMES[nearest]}). "
-                f"Run `readaloud --list-voices --engine kokoro` to see all "
-                f"{len(VOICE_TABLE)} voices.",
-            )
-        for entry in VOICE_TABLE:
-            if entry.accent == accent and entry.gender == gender:
-                return entry.id
-        raise AccentUnavailableError(  # pragma: no cover - table covers all four
-            f"kokoro has no {gender} {ACCENT_NAMES[accent]} English voice",
-            "Run `readaloud --list-voices --engine kokoro`.",
-        )
+        return voice_table.resolve(ENGINE_NAME, accent, gender)
 
     def synthesize(self, text: str, voice: str, speed: float) -> bytes:
         engine = self._load()

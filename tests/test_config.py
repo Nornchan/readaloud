@@ -36,10 +36,12 @@ def test_paths_follow_xdg(tmp_path):
 
 
 def test_config_file_values():
-    write_config('[defaults]\nengine = "piper"\naccent = "in"\ngender = "male"\nspeed = 1.25\n')
+    # Any string round-trips here; validating it against the engine registry
+    # happens later, at engines.load() time.
+    write_config('[defaults]\nengine = "example-engine"\naccent = "in"\ngender = "male"\nspeed = 1.25\n')
     settings = config.load()
     assert (settings.engine, settings.accent, settings.gender, settings.speed) == (
-        "piper", "in", "male", 1.25,
+        "example-engine", "in", "male", 1.25,
     )
     assert settings.source_path is not None
 

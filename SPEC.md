@@ -686,3 +686,87 @@ end to end (24 chunks, correct tags, clean `ffmpeg -f null` decode, 0.48×
 real time uncontended); a full `kill -9` mid-synthesis and resume; cache
 reuse dropping a 28.5s run to 4.1s on identical input; `--estimate` at
 1.08s making zero synthesis calls.
+
+## B.6 Milestone 6 — second engine decision, voices.toml
+
+B.2 left Piper as "milestone 6, or dropped — decided once Kokoro is
+working." Kokoro is not just working now but shipped (milestone 7's
+Homebrew formula passes `brew audit --strict --online --new`, builds from
+source, and its `test do` synthesizes real audio), so this is that
+decision, made against Piper's *current* state rather than the state
+assumed when B.2 was written — per this project's own standing rule not to
+trust training data over a live check.
+
+**Piper, checked now:** the original `rhasspy/piper` — MIT-licensed, which
+is what B.2's "subprocess, not import" reasoning was protecting readaloud's
+own MIT source against — was archived and made read-only in October 2025.
+Active development moved to `OHF-Voice/piper1-gpl`, and the name is
+accurate: it really is GPL-3.0-or-later now, the license B.2 was written
+expecting. So the licensing shape B.2 anticipated is real, not stale.
+
+**Decided: drop it, not build it.** Two independent findings, not one:
+
+- **It would not close the accent gap.** B.3's whole complaint is that
+  Kokoro covers American and British English only. Piper's actual voice
+  set (checked against its Hugging Face voice repository) is also `en_US`
+  and `en_GB` only — nothing for `au`, `ie`, `in`, `za`, `nz`, or `ca`. A
+  second engine with the *same* two accents buys no coverage; the only
+  thing it would add is an alternate voice character in voices already
+  served.
+- **Packaging it cleanly costs more than that's worth.** Piper's own
+  dependencies are lean (`onnxruntime`, `pathvalidate` — no torch), so
+  weight isn't the blocker section 7 originally worried about. The
+  blocker is licensing hygiene: a `resource` block installs straight into
+  readaloud's own Homebrew Cellar prefix alongside every MIT-licensed
+  dependency, which is a much closer coupling than "subprocess, not
+  import" was meant to allow. Doing it properly — a separate
+  `depends_on "piper-tts"` pointing at its own formula, isolated in its
+  own prefix — isn't available off the shelf (homebrew-core has no
+  `piper` or `piper-tts` formula), so it would mean writing, publishing,
+  and maintaining a *second* personal tap formula, for a dependency that
+  is also flagged as looking for maintainers.
+
+Net: a second offline engine here would be more to isolate and maintain
+for zero net accent coverage. `say` remains what it always was —
+development-only, unshipped. Two stale references to a Piper that was
+never built are fixed alongside this: `say.py`'s missing-binary hint
+suggested `--engine piper`; a config test used `"piper"` as its example
+engine string. Both now point at/use something real (`kokoro`).
+
+This is a decision about *this* engine, not the accent gap itself — if a
+maintained offline TTS project ever ships genuine `au`/`ie`/`in`/`za`/
+`nz`/`ca` English, it's worth a fresh look; nothing here forecloses that.
+
+**`voices.yaml` → `voices.toml`.** SPEC.md section 3 calls for a
+`voices.yaml` mapping `(engine, accent, gender)` → voice ID as data, not
+code — kokoro.py's `VOICE_TABLE`/`SUPPORTED_ACCENTS`/`NEAREST_ACCENT`/
+`ACCENT_NAMES` constants were exactly that data, just left in Python
+pending this milestone (see the comment that was on `VOICE_TABLE`). Real
+YAML needs PyYAML, a new Homebrew resource, for one small config file;
+`tomllib` is stdlib (3.11+, this project targets 3.12+) and equally
+editable at this size — comments, nested tables, ordered lists of
+records — so the table now lives in `src/readaloud/voices.toml`, loaded
+through the new `readaloud/voices.py`. This is the same "stdlib where it
+genuinely covers the need" bias as the CLI's own argparse decision (A.7),
+applied to a second dependency this project was about to add. `say.py`
+keeps its own dynamic, subprocess-discovered voice list rather than
+moving into the table — those voices are whatever the local machine has
+installed, so a static table would go stale by construction.
+
+`--list-voices` and accent/gender selection needed no new wiring: both
+were already engine-generic from milestone 4/5 —
+`synthesize.resolve_voice()` duck-types on `backend.resolve_voice()`, and
+`cli.list_voices()` groups whatever `backend.list_voices()` returns. The
+only genuinely hardcoded thing was kokoro's own table; moving it to data
+was the actual scope of this milestone.
+
+**Verified for real:** the full suite (319 tests, 1 skipped pending the
+model download) passes with the table moved; a real wheel was built with
+`python -m build` and installed into a clean venv — not the source tree,
+and run from `/tmp` rather than the repo — to confirm `voices.toml` is
+actually inside the wheel and `importlib.resources` finds it after
+install, not just under an editable install where that would be
+unrepresentative; and the CLI end to end
+(`readaloud article.html --engine kokoro --accent au --gender female`)
+reproduces the exact `AccentUnavailableError` (exit code 12, naming
+`--accent uk`) sourced now from `voices.toml` rather than Python.
