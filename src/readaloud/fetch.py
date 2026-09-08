@@ -16,6 +16,7 @@ from pathlib import Path
 
 import httpx
 
+from readaloud import __version__
 from readaloud.config import cache_home
 from readaloud.errors import FetchError
 
@@ -32,7 +33,10 @@ USER_AGENT = (
 # Wikipedia and other Wikimedia sites do the opposite of the publishers: they
 # 403 generic browser UAs used by automated clients, and accept a descriptive
 # one that says who is calling. So a 403 earns exactly one retry with this.
-DESCRIPTIVE_USER_AGENT = "readaloud/0.1.0 (+https://github.com/norachan/readaloud)"
+# Built from __version__ rather than a literal, so it can't go stale the way
+# a hardcoded one already had (0.1.0, and the wrong GitHub username) by the
+# time this was next touched.
+DESCRIPTIVE_USER_AGENT = f"readaloud/{__version__} (+https://github.com/Nornchan/readaloud)"
 
 HEADERS = {
     "User-Agent": USER_AGENT,
