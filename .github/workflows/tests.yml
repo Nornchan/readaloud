@@ -19,6 +19,13 @@ jobs:
         with:
           python-version: "3.12"
 
+      # GitHub's macos-latest runner does not ship ffmpeg -- unlike a
+      # brew-installed readaloud, which pulls it in as depends_on "ffmpeg"
+      # -- and 16 tests in synthesize.py's suite genuinely need it for
+      # stitching/tagging, discovered by actually running this workflow
+      # rather than assuming a dev machine's toolchain is what CI has.
+      - run: brew install ffmpeg
+
       - run: python -m pip install -e '.[dev]'
 
       # Tests marked real_engine skip themselves when the Kokoro model
