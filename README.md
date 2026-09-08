@@ -1,5 +1,7 @@
 # readaloud
 
+[![homebrew-readaloud CI](https://github.com/Nornchan/homebrew-readaloud/actions/workflows/tests.yml/badge.svg)](https://github.com/Nornchan/homebrew-readaloud/actions/workflows/tests.yml)
+
 Turn a web article, HTML file, or PDF into a listenable audio file, with a
 choice of English accent and voice gender.
 
